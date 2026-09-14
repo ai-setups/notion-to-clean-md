@@ -1,2 +1,3 @@
 # notion-to-clean-md
-Export notion to readable markdown format
+
+Export Notion to readable, human-friendly standard Markdown.
