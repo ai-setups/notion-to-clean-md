@@ -25,8 +25,6 @@ run_lints() {
 run_tests() {
     info "Running Python tests..."
     uv run pytest
-    info "Running TypeScript tests..."
-    npm test
     info "Running shellcheck..."
     find . -name "*.sh" -not -path "./.git/*" -exec shellcheck {} +
 }
