@@ -157,6 +157,7 @@ class Exporter:
             child_title = self._client.fetch_page_title(child_id) or child_id
             subdir_name = _slugify(child_title)
             subdir = self._output_dir / subdir_name
+            subdir.mkdir(parents=True, exist_ok=True)
 
             # Create a sub-exporter for the child page's own directory.
             sub_exporter = Exporter(self._client, subdir, subdir_name + ".md")

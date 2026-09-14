@@ -53,6 +53,15 @@ def _local_filename(url: str) -> str:
     return f"{digest}_{basename}"
 
 
+def _is_notion_hosted(url: str) -> bool:
+    """Return True if the URL is a Notion-hosted image with an expiring
+    signed URL.  Notion serves uploaded images via S3 pre-signed URLs that
+    contain ``X-Amz-`` query parameters.  External images (user-pasted
+    links) never have these parameters and can be kept as-is.
+    """
+    return "X-Amz-" in url
+
+
 class AssetDownloader:
     """Downloads images into ``<output_dir>/assets/`` via a background pool.
 
@@ -86,6 +95,8 @@ class AssetDownloader:
         self._assets_dir.mkdir(parents=True, exist_ok=True)
         mapping: dict[str, str] = {}
         for url in unique_urls:
+            if not _is_notion_hosted(url):
+                continue  # keep external URL as-is, no local mapping
             rel_path = f"{ASSETS_DIRNAME}/{_local_filename(url)}"
             mapping[url] = rel_path
             self._futures.append(self._pool.submit(self._download_one, url, rel_path))
