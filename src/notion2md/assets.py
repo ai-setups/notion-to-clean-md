@@ -16,6 +16,7 @@ every image has been written to disk.
 from __future__ import annotations
 
 import hashlib
+import os
 import sys
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
@@ -119,6 +120,8 @@ class AssetDownloader:
             self._client.close()
 
     def _download_one(self, url: str, rel_path: str) -> None:
+        if os.environ.get("NOTION2MD_SKIP_DOWNLOAD"):
+            return
         target = self._output_dir / rel_path
         if not target.exists():
             response = self._client.get(url)
