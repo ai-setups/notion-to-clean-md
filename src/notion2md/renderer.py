@@ -39,6 +39,7 @@ even when it is structurally a sibling.  Two sub-strategies handle this:
 from __future__ import annotations
 
 from collections.abc import Callable
+from urllib.parse import quote  # noqa: F401 — used indirectly via _encode_path
 
 from . import strategy
 from .model import (
@@ -56,6 +57,18 @@ from .model import (
 from .strategy import ContainerAction, ToggleKind
 
 _LIST_INDENT = "  "
+
+
+def _encode_path(path: str) -> str:
+    """Percent-encode spaces in a local file path for Markdown links.
+
+    Only spaces are encoded (``%20``).  Slashes, unicode characters, and
+    other path components are left as-is so the link stays readable.
+    URLs (starting with ``http``/``https``) are returned unchanged.
+    """
+    if path.startswith(("http://", "https://")):
+        return path
+    return path.replace(" ", "%20")
 
 
 def _indent(block: str, prefix: str) -> str:
@@ -241,11 +254,11 @@ class Renderer:
         if isinstance(node, CodeNode):
             return f"```{node.lang}\n{node.code}\n```"
         if isinstance(node, ImageNode):
-            return f"![{node.alt}]({self._resolve_image(node.url)})"
+            return f"![{node.alt}]({_encode_path(self._resolve_image(node.url))})"
         if isinstance(node, TableNode):
             return node.markdown
         if isinstance(node, PageRefNode):
-            return f"[{node.title}]({self._resolve_page_ref(node.url)})"
+            return f"[{node.title}]({_encode_path(self._resolve_page_ref(node.url))})"
         if isinstance(node, EmptyNode):
             return ""
         raise TypeError(f"Unsupported IR node: {node!r}")
